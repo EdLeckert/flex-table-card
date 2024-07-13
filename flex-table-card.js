@@ -287,6 +287,17 @@ class DataRow {
                         // 'icon' will show the entity's default icon
                         let _icon = this.entity.attributes.icon;
                         raw_content.push(`<ha-icon id="icon" icon="${_icon}"></ha-icon>`);
+                    } else if (col_key === "area") {
+                        // area will show the entity's or its device's assigned area, if any
+                        var area_id;
+                        if (hass.entities[this.entity.entity_id] !== undefined) {
+                            area_id = hass.entities[this.entity.entity_id].area_id;
+                            if (area_id === undefined) {
+                                let device_id = hass.entities[this.entity.entity_id].device_id;
+                                if (device_id !== undefined) area_id = hass.devices[device_id].area_id;
+                            }
+                        }
+                        raw_content.push(area_id === undefined || hass.areas[area_id] === undefined ? "-" : hass.areas[area_id].name);
                     } else if (col_key === "state" && config.auto_format && !col.no_auto_format) {
                         // format entity state
                         raw_content.push(hass.formatEntityState(this.entity));
