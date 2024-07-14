@@ -290,10 +290,10 @@ class DataRow {
                     } else if (col_key === "area") {
                         // 'area' will show the entity's or its device's assigned area, if any
                         raw_content.push(this._get_area_name(this.entity.entity_id, hass));
-                   } else if (col_key === "device") {
+                    } else if (col_key === "device") {
                         // 'device' will show the entity's device name, if any
                         raw_content.push(this._get_device_name(this.entity.entity_id, hass));
-                   } else if (col_key === "state" && config.auto_format && !col.no_auto_format) {
+                    } else if (col_key === "state" && config.auto_format && !col.no_auto_format) {
                         // format entity state
                         raw_content.push(hass.formatEntityState(this.entity));
                     } else if (col_key in this.entity) {
