@@ -151,12 +151,11 @@ class DataTable {
             // sort conf checks
             sort_conf = sort_conf.filter((conf) => conf.idx !== -1 && conf.idx !== null);
             if (sort_conf.length > 0) {
-                
                 this.rows.sort((x, y) => 
                     sort_conf.reduce((out, conf) => 
                         out || conf.dir * compare(
-                            x.data[conf.idx] && x.data[conf.idx].content,
-                            y.data[conf.idx] && y.data[conf.idx].content),
+                            x.data[conf.idx] && (x.data[conf.idx].sort_raw ? x.data[conf.idx].raw_content : x.data[conf.idx].content),
+                            y.data[conf.idx] && (y.data[conf.idx].sort_raw ? y.data[conf.idx].raw_content : y.data[conf.idx].content)),
                         false
                     )
                 );
@@ -416,11 +415,13 @@ class DataRow {
                 return ((this.strict) ? null : "n/a");
 
             return new Object({
+                raw_content: raw,
                 content: content,
                 pre: cfg.prefix || "",
                 suf: cfg.suffix || "",
                 css: cfg.align || "left",
-                hide: cfg.hidden
+                hide: cfg.hidden,
+                sort_raw: cfg.sort_raw
             });
         });
         this.hidden = this.data.some(data => (data === null));
