@@ -323,6 +323,7 @@ class DataRow {
                             //  until the final object value is found.
                             // if at any point in the traversal, the object is not found
                             //  then null will be used as the value.
+                            // Works for arrays as well as single values.
                             let objs = col_key.split('.');
                             let struct = this.entity.attributes;
                             let values = [];
@@ -337,6 +338,8 @@ class DataRow {
                                         struct = (objs[idx] in struct) ? struct[objs[idx]] : null;
                                     }
                                 }
+                                // If no array found, single value is in struct.
+                                if (values.length == 0) values = struct;
                             }
                             raw_content.push(values);
                         }
