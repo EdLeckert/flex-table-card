@@ -294,8 +294,8 @@ class DataRow {
                         // 'device' will show the entity's device name, if any
                         raw_content.push(this._get_device_name(this.entity.entity_id, hass));
                     } else if (col_key === "state" && config.auto_format && !col.no_auto_format) {
-                        // format entity state
-                        raw_content.push(hass.formatEntityState(this.entity));
+                        // format entity state; also return unformatted value
+                        raw_content.push({ ha_fmt: hass.formatEntityState(this.entity), raw: this.entity[col_key] });
                     } else if (col_key in this.entity) {
                         // easy direct member of entity, unformatted
                         raw_content.push(this.entity[col_key]);
@@ -435,7 +435,21 @@ class DataRow {
         // apply passed "modify" configuration setting by using eval()
         // assuming the data is available inside the function as "x"
         this.data = this.raw_data.map((raw, idx) => {
-            let x = raw;
+            function _getCrossCellRefs(modify, raw_data) {
+                function _replacer(match, p1) {
+                    return match[0] == "u" ? raw_data[p1].raw || raw_data[p1] : raw_data[p1].ha_fmt || raw_data[p1].raw || raw_data[p1];
+                }
+                // Search for cross-cell references and replace with actual values.
+                const regex = /[xu]\[(\d+)\]/gm;
+                modify = modify.replace(regex, _replacer);
+                return modify;
+            }
+
+            // If HA formatting specified, dict will contain both formatted and unformatted values.
+            // Otherwise there is only a single raw value.
+            // x will become fully formatted. u will remain unformatted. Both are available to users via modify.
+            let x = raw.ha_fmt || raw.raw || raw;
+            let u = raw.raw || raw;
             let cfg = col_cfgs[idx];
 			let fmt = new CellFormatters();
             if (cfg.fmt) {
@@ -443,8 +457,8 @@ class DataRow {
                 if (fmt.failed)
                    x = null;
             }
-
-            let content = (cfg.modify) ? eval(cfg.modify) : x;
+            let modify = cfg.modify ? _getCrossCellRefs(cfg.modify, this.raw_data) : null;
+            let content = (modify) ? eval(modify) : x;
 
             // check for undefined/null values and omit if strict set
             if (content === "undefined" || typeof content === "undefined" || content === null ||
@@ -457,7 +471,7 @@ class DataRow {
                 suf: cfg.suffix || "",
                 css: cfg.align || "left",
                 hide: cfg.hidden,
-                raw_content: raw,
+                raw_content: u,
                 sort_unmodified: cfg.sort_unmodified
             });
         });
