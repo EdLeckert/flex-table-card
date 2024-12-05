@@ -68,7 +68,7 @@ columns:
       let t = x.split(';')[0]; 
       let v = x.split(';')[1]; 
       let chill = 35.74 + (0.6215 * t) - (35.75 * (v ** 0.16)) + (0.4275 * t * (v ** 0.16));
-      v <= 3.0 || t > 50 ? t : chill.toFixed(1);
+      (v <= 3.0 || t > 50 ? t : chill.toFixed(1)) + " °F";
 ```
 
 Note the need for `no_auto_format: true` on the `Wind Chill` column when the card option `auto_format: true` is used,
