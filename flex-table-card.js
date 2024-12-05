@@ -440,7 +440,7 @@ class DataRow {
                     return match[0] == "u" ? raw_data[p1].raw || raw_data[p1] : raw_data[p1].ha_fmt || raw_data[p1];
                 }
                 // Search for cross-cell references and replace with actual values.
-                const regex = /[xu]\[(\d+)\]/gm;
+                const regex = /[xu]\[(\d+)\]/g;
                 modify = modify.replace(regex, _replacer);
                 return modify;
             }
