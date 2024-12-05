@@ -71,9 +71,8 @@ columns:
       v <= 3.0 || t > 50 ? t : chill.toFixed(1);
 ```
 
-Note the need for `no_auto_format: true` on the `Wind Chill` column. Without this option, the variables `t` and `v`
-will contain measurement units (due to the card option `auto_format: true`), which will break the math calculation 
-and result in `NaN` for the column value. 
+Note the need for `no_auto_format: true` on the `Wind Chill` column when the card option `auto_format: true` is used,
+since unformatted values are needed for math. If you get `NaN` as the result, this could be the issue.
  
 The card produced by the previous two card definitions looks like this:
 
