@@ -27,6 +27,7 @@ resources:
 * [(Configuration) Examples](https://github.com/custom-cards/flex-table-card/tree/master/docs)
   * [Basics](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-basics.md)
   * [Column Data Selector](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-data.md)
+  * [Using Multiple Values in a Column](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-multiple-values.md)
   * [Formatting](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-simple-cell-formatting.md)
   * [Sorting & Strict](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-sorting-strict.md)
   * [Headers](https://github.com/custom-cards/flex-table-card/tree/master/docs/example-cfg-headers.md)

@@ -95,10 +95,10 @@ parsed and based on this parsed, then generated data.
 To use the `modify` option on a column, write JavaScript code to achieve the desired result. 
 The variable `x` contains the formatted data specified by the `data` option, while the variable `u`
 contains the unmodified version. The formatted version may have been formatted either by Home Assistant
-(if the global option `auto_format` is `true` and the column option `no_auto_format` is not `true`) or by 
+(if the card option `auto_format` is `true` and the column option `no_auto_format` is not `true`) or by 
 predefined formatters if the column option `fmt` is used. The `u` variable has not been affected by these options.
 
-Here is a simple example formats the default date and time provided by Home Assistant:
+Here is a simple example that formats the default date and time provided by Home Assistant:
 
 ``` yaml
 type: custom:flex-table-card
@@ -171,7 +171,7 @@ Columns include functions, HTML formatting, and logic statements.
 type: custom:flex-table-card
 service: wine_cellar.get_inventory
 entities:
-    include: sensor.edleckert_wine_inventory
+    include: sensor.member_wine_inventory
 clickable: true
 sort_by:
     - ConsumeBy
@@ -259,10 +259,10 @@ css:
 ```
 
 Note the use of `modify` as a data selector in several colums, such as `ConsumeBy`, where two children of `inventory`,
-`BeginConsume` and `EndConsume` are both needed.
+`BeginConsume` and `EndConsume`, are both needed.
 
 Here is the result:
 
-<img src="../images/WineInventoryList.png" alt="Simple Modify Example" width="500px">
+<img src="../images/WineInventoryList.png" alt="Wine Inventory Example" width="500px">
 
 [Return to main README.md](../README.md)

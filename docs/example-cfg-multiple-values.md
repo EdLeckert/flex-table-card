@@ -73,8 +73,8 @@ columns:
 
 Note the need for `no_auto_format: true` on the `Wind Chill` column. Without this option, the variables `t` and `v`
 will contain measurement units (due to the card option `auto_format: true`), which will break the math calculation 
-and result in `NaN` for the column value.
-
+and result in `NaN` for the column value. 
+ 
 The card produced by the previous two card definitions looks like this:
 
 <!-- [example image section] -->
