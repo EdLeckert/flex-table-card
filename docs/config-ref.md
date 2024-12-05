@@ -75,10 +75,10 @@ definition. Apart from `sort_by` no other option requires referencing of this id
 
 | option                 | Type     | Required?     | Description
 | ----                   | ----     | ------------- | -----------
-| `data`                 | string   | **required**  | selector for data to be shown, see [column data examples](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-data.md)
+| `data`                 | string   |   optional    | usually required; selector for data to be shown, see [column data examples](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-data.md)
 | `hidden`               | bool     |   optional    | `true` to avoid showing the column (e.g., for sorting)
 | `icon`                 | string   |   optional    | use `icon` inside header (left of `name`), typical `mdi:something` ([cheatsheet](https://cdn.materialdesignicons.com/4.5.95/))
-| `modify`               | string   |   optional*   | apply java-script code, `x` is data, i.e., `(x) => eval(<modfiy>)`
+| `modify`               | string   |   optional*   | apply java-script code, `x` is formatted data, `u` is unformatted, i.e., `(x) => eval(<modfiy>)`
 | `align`                | enum     |   optional    | text alignment, one of: `left`, `center`, `right` (default: `left`)
 | `prefix`               | string   |   optional    | to be applied _before_ all cell contents 
 | `suffix`               | string   |   optional    | to be appended _after_ all cell contents
@@ -96,7 +96,8 @@ definition. Apart from `sort_by` no other option requires referencing of this id
 *Use `modify` and `footer_modify` with _caution_ and at your own risk only. This will directly execute code using `eval()`, which is by definition a safety risk. Especially avoid processing any third party APIs / contents with `flex-table-card` using the `modify` or `footer_modify` parameters, *only apply these parameters if you are 100% sure about the contents and origin of the data.* 
 Apart from that `modify` and `footer_modify` are very powerful, see [advanced cell formatting](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-advanced-cell-formatting.md).
 
-**Note: In releases after v0.7.7, using `modify` as a data selector is discouraged. The `data` option can now be used to walk complex structures where `modify` was once needed.**
+**Note: In releases after v0.7.7, using `modify` as a data selector to walk complex structures is discouraged if the `data` option alone can be used. 
+The `modify` was once needed for many cases that the `data` option can now handle.**
 
 ### Currently the available *formatters are: 
 * `full_datetime`

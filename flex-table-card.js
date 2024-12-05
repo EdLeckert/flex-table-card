@@ -300,9 +300,9 @@ class DataRow {
                         // easy direct member of entity, unformatted
                         raw_content.push(this.entity[col_key]);
                     } else if (col_key in this.entity.attributes) {
-                        // finally fall back to '.attributes' member
+                        // finally fall back to '.attributes' member; format if requested
                         if (config.auto_format && !col.no_auto_format) {
-                            raw_content.push(hass.formatEntityAttributeValue(this.entity, col_key));
+                            raw_content.push({ ha_fmt: hass.formatEntityAttributeValue(this.entity, col_key), raw: this.entity.attributes[col_key] });
                         }
                         else {
                             raw_content.push(this.entity.attributes[col_key]);
@@ -437,7 +437,7 @@ class DataRow {
         this.data = this.raw_data.map((raw, idx) => {
             function _getCrossCellRefs(modify, raw_data) {
                 function _replacer(match, p1) {
-                    return match[0] == "u" ? raw_data[p1].raw || raw_data[p1] : raw_data[p1].ha_fmt || raw_data[p1].raw || raw_data[p1];
+                    return match[0] == "u" ? raw_data[p1].raw || raw_data[p1] : raw_data[p1].ha_fmt || raw_data[p1];
                 }
                 // Search for cross-cell references and replace with actual values.
                 const regex = /[xu]\[(\d+)\]/gm;
@@ -448,7 +448,7 @@ class DataRow {
             // If HA formatting specified, dict will contain both formatted and unformatted values.
             // Otherwise there is only a single raw value.
             // x will become fully formatted. u will remain unformatted. Both are available to users via modify.
-            let x = raw.ha_fmt || raw.raw || raw;
+            let x = raw.ha_fmt || raw;
             let u = raw.raw || raw;
             let cfg = col_cfgs[idx];
 			let fmt = new CellFormatters();
