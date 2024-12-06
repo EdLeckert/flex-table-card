@@ -104,14 +104,18 @@ Here is a simple example that formats the default date and time provided by Home
 type: custom:flex-table-card
 entities:
   include: sensor.*last_seen
+auto_format: true
 columns:
   - name: Entity
     data: friendly_name
-  - name: Time (Unformatted)
+  - name: Unformatted
     data: state
-  - name: Time (Formatted)
+    no_auto_format: true
+  - name: Formatted by Home Assistant
     data: state
-    modify: new Date(x)
+  - name: Formatted by Modify
+    data: state
+    modify: new Date(u)
 ```
 
 <img src="../images/SimpleModifyExample.png" alt="Simple Modify Example" width="500px">
