@@ -1,5 +1,22 @@
 # Examples - Using Multiple Values in a Column
 
+## Using Multiple Values From an Entity
+
+To simply show multiple values in a column, use a comma separated list for the `data` option.
+The `multi_delimiter` can be used to specify the separator used between values.
+
+``` yaml
+type: custom:flex-table-card
+entities:
+  include: sensor.living_room_temperature
+columns:
+  - name: Temperature
+    data: friendly_name, state
+    multi_delimiter: ': '
+```
+
+<img src="../images/SimpleMulti.png" alt="Simple Multiple Values Example" width="500px">
+
 ## Perform Math Using Values From Other Columns
 
 To use values from other columns of the same row, in the `modify` option use `x` for formatted values and 
@@ -14,7 +31,7 @@ Wind chill is only defined for temperatures at or below 50°F and wind speeds abo
 ```
 
 The `Wind Chill` column will use the 2nd column, or `u[1]` for the value of `t`, and the 3rd column,
-or `u[2]`, for `v`. The `u` will return the unformatted version of the data in those columns.
+or `u[2]`, for `v`. The `u` will return the unformatted version of the data in those columns, which is needed for math.
 
 ``` yaml
 type: custom:flex-table-card
