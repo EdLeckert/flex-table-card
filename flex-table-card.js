@@ -402,7 +402,7 @@ class DataRow {
                 raw_content = raw_content.map((obj) => String(obj)).join(delim);
             // new approach, KEEP AFTER DEPRECATION: (maybe without 'else' working anyways?!)
             else if ("data" in col && raw_content.length > 1)
-                raw_content = raw_content.map((obj) => String(obj)).join(delim);
+                raw_content = raw_content.map((obj) => obj.ha_fmt || String(obj)).join(delim);
             else
                 raw_content = raw_content[0];
             

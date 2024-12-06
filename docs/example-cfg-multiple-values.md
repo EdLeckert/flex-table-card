@@ -72,7 +72,8 @@ columns:
 ```
 
 Note the need for `no_auto_format: true` on the `Wind Chill` column when the card option `auto_format: true` is used,
-since unformatted values are needed for math. If you get `NaN` as the result, this could be the issue.
+since unformatted values are needed for math. (Alternatively, you could use `parseFloat` to remove the formatting from `t` and `v`.)
+If you get `NaN` as the result, check that unformatted values are being used in the calculations.
  
 The card produced by the previous two card definitions looks like this:
 
