@@ -78,7 +78,7 @@ definition. Apart from `sort_by` no other option requires referencing of this id
 | `data`                 | string   |   optional    | usually required; selector for data to be shown, see [column data examples](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-data.md)
 | `hidden`               | bool     |   optional    | `true` to avoid showing the column (e.g., for sorting)
 | `icon`                 | string   |   optional    | use `icon` inside header (left of `name`), typical `mdi:something` ([cheatsheet](https://cdn.materialdesignicons.com/4.5.95/))
-| `modify`               | string   |   optional*   | apply java-script code; `x` is formatted data, `u` is unformatted, i.e., `(x) => eval(<modfiy>)`
+| `modify`               | string   |   optional*   | apply java-script code; `x` is formatted data, `u` is unformatted, i.e., `(x) => eval(<modify>)`
 | `align`                | enum     |   optional    | text alignment, one of: `left`, `center`, `right` (default: `left`)
 | `prefix`               | string   |   optional    | to be applied _before_ all cell contents 
 | `suffix`               | string   |   optional    | to be appended _after_ all cell contents
