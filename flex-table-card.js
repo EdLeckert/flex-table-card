@@ -458,7 +458,12 @@ class DataRow {
                 css: cfg.align || "left",
                 hide: cfg.hidden,
                 raw_content: raw,
-                sort_unmodified: cfg.sort_unmodified
+                sort_unmodified: cfg.sort_unmodified,
+                can_edit: cfg.can_edit,
+                edit_action: cfg.edit_action,
+                service: cfg.service,
+                target: cfg.target,
+                service_data: cfg.service_data
             });
         });
         this.hidden = this.data.some(data => (data === null));
@@ -501,7 +506,7 @@ class FlexTableCard extends HTMLElement {
         }
 
         if (!incl && !excl && entities) {
-                       entities = entities.map(format_entities);
+            entities = entities.map(format_entities);
             return entities.map(e => hass.states[e.entity]);
         }
 
@@ -553,7 +558,7 @@ class FlexTableCard extends HTMLElement {
 
         // CSS styles as assoc-data to allow seperate updates by key, i.e., css-selector
         var css_styles = {
-            "table":                    "width: 100%; padding: 16px; ",
+            "table":                    "width: 100%; padding: 16px; user-select: text; ",
             "thead th":                 "height: 1em;",
             "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; ",
             "th":                       "padding-left: 0.5em; padding-right: 0.5em; ",
@@ -647,17 +652,89 @@ class FlexTableCard extends HTMLElement {
         this._config = cfg;
     }
 
+    _getCrossCellRefs(input_data, raw_data) {
+        function _replacer(match, p1) {
+            return match[0] == raw_data[p1];
+        }
+        // Search for cross-cell references and replace with actual values.
+        const regex = /[x]\[(\d+)\]/g;
+        modify = input_data.replace(regex, _replacer);
+        return modify;
+    }
+
+    _setup_cell_for_editing(elem, col, index) {
+        let cell = elem.cells[index];
+        cell.addEventListener("blur", function (blur_ev) {
+            function _getCrossCellRefs(modify, raw_data) {
+                function _replacer(match, p1) {
+                    return raw_data[p1].innerText;
+                }
+                // Search for cross-cell references and replace with actual values.
+                const regex = /[x]\[(\d+)\]/g;
+                modify = modify.replace(regex, _replacer);
+                return modify;
+            }
+            if (this.textContent != this.dataset.original) {
+                const values = Object.values(col.service_data);
+                for (const value of values) {
+                    console.log(_getCrossCellRefs(value, elem.cells));
+                }
+
+                const actionConfig = {
+                    tap_action: {
+                        action: col.edit_action,
+                        service: col.service,
+                        target: col.target,
+                        data: col.service_data,
+                    },
+                };
+                let ev = new Event("hass-action", {
+                    bubbles: true, cancelable: false, composed: true
+                });
+                ev.detail = {
+                    config: actionConfig,
+                    action: "tap",
+                };
+                this.dispatchEvent(ev);
+
+                this.dataset.original = this.textContent;
+            }
+        });
+        cell.addEventListener("keydown", function (keydown_ev) {
+            if (keydown_ev.key === 'Escape' || keydown_ev.keyCode === 27) {
+                this.textContent = this.dataset.original;
+            }
+        });
+    }
+
+    _get_html_for_editable_cell(cell) {
+        if (cell.can_edit) {
+            return 'contenteditable="true" data-original="' + cell.pre + cell.content + cell.suf + '"'
+        }
+        else {
+            return "";
+        }
+    }
+
     _updateContent(element, rows) {
         // callback for updating the cell-contents
         element.innerHTML = rows.map((row, index) =>
             `<tr id="entity_row_${row.entity.entity_id}_${index}">${row.data.map(
                 (cell) => ((!cell.hide) ?
-                    `<td class="${cell.css}">${cell.pre}${cell.content}${cell.suf}</td>` : "")
+                    `<td class="${cell.css}" ${this._get_html_for_editable_cell(cell)}>${cell.pre}${cell.content}${cell.suf}</td>` : "")
             ).join("")}</tr>`).join("");
 
         // if configured, set clickable row to show entity popup-dialog
         rows.forEach((row, index) => {
-            const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`);
+            const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`); 
+
+            // setup any editable columns
+            row.data.forEach((col, index) => {
+                if (col.can_edit) {
+                    this._setup_cell_for_editing(elem, col, index);
+                }
+            });
+
             // bind click()-handler to row (if configured)
             elem.onclick = (this.tbl.cfg.clickable) ? (function(clk_ev) {
                 // create and fire 'details-view' signal
