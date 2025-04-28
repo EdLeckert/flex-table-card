@@ -462,8 +462,10 @@ class DataRow {
                 can_edit: cfg.can_edit,
                 edit_action: cfg.edit_action,
                 service: cfg.service,
+                service_template: cfg.service_template,
                 target: cfg.target,
-                service_data: cfg.service_data
+                service_data: cfg.service_data,
+                valid_regex: cfg.valid_regex
             });
         });
         this.hidden = this.data.some(data => (data === null));
@@ -652,40 +654,62 @@ class FlexTableCard extends HTMLElement {
         this._config = cfg;
     }
 
-    _getCrossCellRefs(input_data, raw_data) {
-        function _replacer(match, p1) {
-            return match[0] == raw_data[p1];
-        }
-        // Search for cross-cell references and replace with actual values.
-        const regex = /[x]\[(\d+)\]/g;
-        modify = input_data.replace(regex, _replacer);
-        return modify;
-    }
-
-    _setup_cell_for_editing(elem, col, index) {
+    _setup_cell_for_editing(elem, row, col, index) {
         let cell = elem.cells[index];
         cell.addEventListener("blur", function (blur_ev) {
-            function _getCrossCellRefs(modify, raw_data) {
+            function getCellRefs(modify, raw_data) {
                 function _replacer(match, p1) {
-                    return raw_data[p1].innerText;
+                    return raw_data[p1].innerText.trim();
                 }
-                // Search for cross-cell references and replace with actual values.
-                const regex = /[x]\[(\d+)\]/g;
+                // Search for cell references and replace with actual values.
+                const regex = /[x]\[(\d+)\]/gm;
                 modify = modify.replace(regex, _replacer);
                 return modify;
             }
+
             if (this.textContent != this.dataset.original) {
-                const values = Object.values(col.service_data);
-                for (const value of values) {
-                    console.log(_getCrossCellRefs(value, elem.cells));
+                // Validate text
+                if (col.valid_regex) {
+                    let regex = new RegExp(col.valid_regex);
+                    if (!regex.test(this.textContent)) {
+                        this.textContent = this.dataset.original;
+                        alert("Text does not pass validation check.");
+                        throw new Error("Text does not pass validation check.");
+                    }
                 }
+
+                // Evaluate service_template for placeholders and Javascript
+                let service;
+                if (col.service_template) {
+                    try {
+                        service = eval(getCellRefs(col.service_template, elem.cells));
+                    } catch (error) {
+                        alert(error);
+                        this.textContent = this.dataset.original;
+                    }
+                }
+                else {
+                    service = col.service;
+                }
+
+                // Substitute actual data for placeholders
+                const modified_data = Object.fromEntries(
+                    Object.entries(col.service_data).map(([key, value]) => [key, getCellRefs(value, elem.cells)])
+                );
+
+                // Remove empty entries from service_data. 
+                // Usually used with service_template when different services have different params.
+                const service_data = Object.fromEntries(
+                    Object.entries(modified_data).filter(([key, value]) =>
+                        (value !== null && value !== undefined && value !== ''))
+                );
 
                 const actionConfig = {
                     tap_action: {
                         action: col.edit_action,
-                        service: col.service,
-                        target: col.target,
-                        data: col.service_data,
+                        service: service,
+                        target: { entity_id: col.target || row.entity.entity_id },
+                        data: service_data,
                     },
                 };
                 let ev = new Event("hass-action", {
@@ -695,11 +719,12 @@ class FlexTableCard extends HTMLElement {
                     config: actionConfig,
                     action: "tap",
                 };
-                this.dispatchEvent(ev);
 
+                this.dispatchEvent(ev);
                 this.dataset.original = this.textContent;
             }
         });
+
         cell.addEventListener("keydown", function (keydown_ev) {
             if (keydown_ev.key === 'Escape' || keydown_ev.keyCode === 27) {
                 this.textContent = this.dataset.original;
@@ -729,9 +754,9 @@ class FlexTableCard extends HTMLElement {
             const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`); 
 
             // setup any editable columns
-            row.data.forEach((col, index) => {
+            row.data.forEach((col, colindex) => {
                 if (col.can_edit) {
-                    this._setup_cell_for_editing(elem, col, index);
+                    this._setup_cell_for_editing(elem, row, col, colindex);
                 }
             });
 
@@ -887,7 +912,6 @@ class FlexTableCard extends HTMLElement {
             let entity_list = entities.map((entity) =>
                 entity.entity_id
             );
-
             hass.callWS({
                 "type": "call_service",
                 "domain": domain,
