@@ -661,24 +661,24 @@ class FlexTableCard extends HTMLElement {
                 function _replacer(match, p1) {
                     return raw_data[p1].innerText.trim();
                 }
-                // Search for cell references and replace with actual values.
+                // Search for cell references (e.g. "x[2]") and replace with actual cell values.
                 const regex = /[x]\[(\d+)\]/gm;
                 modify = modify.replace(regex, _replacer);
                 return modify;
             }
 
             if (this.textContent != this.dataset.original) {
-                // Validate text
+                // Validate text if regex provided
                 if (col.valid_regex) {
                     let regex = new RegExp(col.valid_regex);
                     if (!regex.test(this.textContent)) {
-                        this.textContent = this.dataset.original;
                         alert("Text does not pass validation check.");
-                        throw new Error("Text does not pass validation check.");
+                        this.textContent = this.dataset.original;
+                        return;
                     }
                 }
 
-                // Evaluate service_template for placeholders and Javascript
+                // Evaluate service_template, if provided, for placeholders and Javascript
                 let service;
                 if (col.service_template) {
                     try {
@@ -686,6 +686,7 @@ class FlexTableCard extends HTMLElement {
                     } catch (error) {
                         alert(error);
                         this.textContent = this.dataset.original;
+                        throw error;
                     }
                 }
                 else {
@@ -726,8 +727,14 @@ class FlexTableCard extends HTMLElement {
         });
 
         cell.addEventListener("keydown", function (keydown_ev) {
+            // Discard edit on Escape pressed
             if (keydown_ev.key === 'Escape' || keydown_ev.keyCode === 27) {
                 this.textContent = this.dataset.original;
+            }
+            else if (keydown_ev.key === 'Enter' || keydown_ev.keyCode === 13) {
+                // Accept edit on Enter pressed (lose focus)
+                this.blur();
+                keydown_ev.preventDefault();
             }
         });
     }
