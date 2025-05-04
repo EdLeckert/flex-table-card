@@ -459,13 +459,13 @@ class DataRow {
                 hide: cfg.hidden,
                 raw_content: raw,
                 sort_unmodified: cfg.sort_unmodified,
-                can_edit: cfg.can_edit,
-                edit_action: cfg.edit_action,
                 service: cfg.service,
                 service_template: cfg.service_template,
-                target: cfg.target,
-                service_data: cfg.service_data,
-                valid_regex: cfg.valid_regex
+                valid_regex: cfg.valid_regex,
+                tap_action: cfg.tap_action,
+                double_tap_action: cfg.double_tap_action,
+                hold_action: cfg.hold_action,
+                edit_action: cfg.edit_action,
             });
         });
         this.hidden = this.data.some(data => (data === null));
@@ -569,6 +569,7 @@ class FlexTableCard extends HTMLElement {
             "tr td.center":             "text-align: center; ",
             "th.center":                "text-align: center; ",
             "tr td.right":              "text-align: right; ",
+            "td.mouseheld":             "background-color: LightCyan; ",
             "th.right":                 "text-align: right; ",
             ".headerSortDown::after, .headerSortUp::after":
                                         "content: ''; position: relative; left: 2px; border: 6px solid transparent; ",
@@ -655,18 +656,18 @@ class FlexTableCard extends HTMLElement {
     }
 
     _setup_cell_for_editing(elem, row, col, index) {
-        let cell = elem.cells[index];
-        cell.addEventListener("blur", function (blur_ev) {
-            function getCellRefs(modify, raw_data) {
-                function _replacer(match, p1) {
-                    return raw_data[p1].innerText.trim();
-                }
-                // Search for cell references (e.g. "x[2]") and replace with actual cell values.
-                const regex = /[x]\[(\d+)\]/gm;
-                modify = modify.replace(regex, _replacer);
-                return modify;
+        function getCellRefs(modify, raw_data) {
+            function _replacer(match, p1) {
+                return raw_data[p1].innerText.trim();
             }
+            // Search for cell references (e.g. "x[2]") and replace with actual cell values.
+            const regex = /[x]\[(\d+)\]/gm;
+            modify = modify.replace(regex, _replacer);
+            return modify;
+        }
 
+        function _handle_lost_focus(e) {
+            // Check if user changed text.
             if (this.textContent != this.dataset.original) {
                 // Validate text if regex provided
                 if (col.valid_regex) {
@@ -678,41 +679,19 @@ class FlexTableCard extends HTMLElement {
                     }
                 }
 
-                // Evaluate service_template, if provided, for placeholders and Javascript
-                let service;
-                if (col.service_template) {
-                    try {
-                        service = eval(getCellRefs(col.service_template, elem.cells));
-                    } catch (error) {
-                        alert(error);
-                        this.textContent = this.dataset.original;
-                        throw error;
-                    }
-                }
-                else {
-                    service = col.service;
-                }
-
                 // Substitute actual data for placeholders
-                const modified_data = Object.fromEntries(
-                    Object.entries(col.service_data).map(([key, value]) => [key, getCellRefs(value, elem.cells)])
-                );
-
-                // Remove empty entries from service_data. 
-                // Usually used with service_template when different services have different params.
                 const service_data = Object.fromEntries(
-                    Object.entries(modified_data).filter(([key, value]) =>
-                        (value !== null && value !== undefined && value !== ''))
+                    Object.entries(col.edit_action.data).map(([key, value]) => [key, getCellRefs(value, elem.cells)])
                 );
-
                 const actionConfig = {
                     tap_action: {
-                        action: col.edit_action,
-                        service: service,
-                        target: { entity_id: col.target || row.entity.entity_id },
+                        action: "perform-action",
+                        perform_action: col.edit_action.perform_action,
                         data: service_data,
+                        target: col.edit_action.target || { entity_id: row.entity.entity_id },
                     },
                 };
+
                 let ev = new Event("hass-action", {
                     bubbles: true, cancelable: false, composed: true
                 });
@@ -724,23 +703,27 @@ class FlexTableCard extends HTMLElement {
                 this.dispatchEvent(ev);
                 this.dataset.original = this.textContent;
             }
-        });
+        }
 
-        cell.addEventListener("keydown", function (keydown_ev) {
+        function _handle_keydown(e) {
             // Discard edit on Escape pressed
-            if (keydown_ev.key === 'Escape' || keydown_ev.keyCode === 27) {
+            if (e.key === 'Escape' || e.keyCode === 27) {
                 this.textContent = this.dataset.original;
             }
-            else if (keydown_ev.key === 'Enter' || keydown_ev.keyCode === 13) {
+            else if (e.key === 'Enter' || e.keyCode === 13) {
                 // Accept edit on Enter pressed (lose focus)
                 this.blur();
-                keydown_ev.preventDefault();
+                e.preventDefault();
             }
-        });
+        }
+
+        let cell = elem.cells[index];
+        cell.addEventListener("blur", _handle_lost_focus);
+        cell.addEventListener("keydown", _handle_keydown);
     }
 
     _get_html_for_editable_cell(cell) {
-        if (cell.can_edit) {
+        if (cell.edit_action) {
             return 'contenteditable="true" data-original="' + cell.pre + cell.content + cell.suf + '"'
         }
         else {
@@ -756,17 +739,206 @@ class FlexTableCard extends HTMLElement {
                     `<td class="${cell.css}" ${this._get_html_for_editable_cell(cell)}>${cell.pre}${cell.content}${cell.suf}</td>` : "")
             ).join("")}</tr>`).join("");
 
-        // if configured, set clickable row to show entity popup-dialog
-        rows.forEach((row, index) => {
-            const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`); 
+        function _fireEvent(obj, action_type, actionConfig) {
+            let ev = new Event("hass-action", {
+                bubbles: true, cancelable: false, composed: true
+            });
 
-            // setup any editable columns
-            row.data.forEach((col, colindex) => {
-                if (col.can_edit) {
-                    this._setup_cell_for_editing(elem, row, col, colindex);
+            let atype = action_type.replace("_action", "");
+            ev.detail = {
+                config: actionConfig,
+                action: atype,
+            };
+            obj.dispatchEvent(ev);
+        }
+
+        // Define handlers for cell actions.
+        function _handle_more_info(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "more-info",
+                    entity: col[action_type].target?.entity_id ?? row.entity.entity_id
+                },
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+
+        function _handle_toggle(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "toggle",
+                },
+                entity: col[action_type].target?.entity_id ?? row.entity.entity_id,
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+
+        function _handle_perform_action(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "perform-action",
+                    perform_action: col[action_type].perform_action,
+                    data: col[action_type].data,
+                    target: col[action_type].target,
+                },
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+
+        function _handle_navigate(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "navigate",
+                    navigation_path: col[action_type].navigation_path ?? col.content,
+                },
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+
+        function _handle_url(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "url",
+                    url_path: col[action_type].url_path ?? col.content,
+                },
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+
+        function _handle_assist(obj, action_type, row, col) {
+            const actionConfig = {
+                [action_type]: {
+                    action: "assist",
+                    start_listening: col[action_type].start_listening,
+                    pipeline_id: col[action_type].pipeline_id,
+                },
+            };
+
+            _fireEvent(obj, action_type, actionConfig);
+        }
+        function _handle_action(obj, action_type, row, col) {
+            let action;
+            switch (action_type) {
+                case "tap_action":
+                    action = col.tap_action;
+                    break;
+                case "double_tap_action":
+                    action = col.double_tap_action;
+                    break;
+                case "hold_action":
+                    action = col.hold_action;
+                    break;
+                default:
+                    throw new Error(`Expected one of tap_action, double_tap_action, hold_action, but received: ${action_type}`)
+            }
+
+            switch (action["action"]) {
+                case "more-info":
+                    _handle_more_info(obj, action_type, row, col);
+                    break;
+                case "toggle":
+                    _handle_toggle(obj, action_type, row, col);
+                    break;
+                case "perform-action":
+                    _handle_perform_action(obj, action_type, row, col);
+                    break;
+                case "navigate":
+                    _handle_navigate(obj, action_type, row, col);
+                    break;
+                case "url":
+                    _handle_url(obj, action_type, row, col);
+                    break;
+                case "assist":
+                    _handle_assist(obj, action_type, row, col);
+                    break;
+                case "edit":
+                    _handle_edit(obj, action_type, row, col);
+                    break;
+                case "none":
+                    break;
+                default:
+                    throw new Error(`Expected one of none, toggle, more-info, perform-action, url, navigate, assist, edit, but received: ${action["action"]}`)
+            }
+        }
+
+        rows.forEach((row, index) => {
+            const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`);
+            let colindex = -1;
+
+            // Setup any actionable columns
+            row.data.forEach((col, idx) => {
+                if (!col.hide) {
+                    colindex++;
+                    let cell = elem.cells[colindex];
+                    let clickTimer = 0;
+                    let holdTimer = 0;
+                    let isHolding = false;
+
+                    if (col.tap_action) {
+                        function handleClick(e) {
+                            if (clickTimer == 0 && holdTimer == 0) {
+                                clickTimer = setTimeout(() => {
+                                    _handle_action(this, "tap_action", row, col);
+                                    clickTimer = 0;
+                                }, 400);
+                            }
+                        }
+                        cell.addEventListener("click", handleClick);
+                    };
+
+                    if (col.double_tap_action) {
+                        function handleDoubleClick(e) {
+                            clearTimeout(clickTimer);
+                            clickTimer = 0;
+                            _handle_action(this, "double_tap_action", row, col);
+                        }
+                        cell.addEventListener("dblclick", handleDoubleClick);
+                    };
+
+                    if (col.hold_action) {
+                        const holdDuration = 500;
+
+                        function handleMouseDown(e) {
+                            isHolding = false;
+                            holdTimer = setTimeout(() => {
+                                isHolding = true;
+                                cell.classList.add("mouseheld");
+                            }, holdDuration);
+                        }
+
+                        function handleMouseUp(e) {
+                            if (isHolding) {
+                                isHolding = false;
+                                _handle_action(this, "hold_action", row, col);
+                            }
+                            else {
+                                clearTimeout(holdTimer);
+                                holdTimer = 0;
+                            }
+                        }
+
+                        function handleCancel(e) {
+                            cell.classList.remove("mouseheld");
+                        }
+
+                        // Add event listeners to the desired element
+                        cell.addEventListener('mousedown', handleMouseDown);
+                        cell.addEventListener('mouseup', handleMouseUp);
+                        window.addEventListener('mouseup', handleCancel);
+                    };
+
+                    if (col.edit_action) {
+                        this._setup_cell_for_editing(elem, row, col, colindex);
+                    }
                 }
             });
 
+            // if configured, set clickable row to show entity popup-dialog
             // bind click()-handler to row (if configured)
             elem.onclick = (this.tbl.cfg.clickable) ? (function(clk_ev) {
                 // create and fire 'details-view' signal
