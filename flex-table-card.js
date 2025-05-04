@@ -459,9 +459,6 @@ class DataRow {
                 hide: cfg.hidden,
                 raw_content: raw,
                 sort_unmodified: cfg.sort_unmodified,
-                service: cfg.service,
-                service_template: cfg.service_template,
-                valid_regex: cfg.valid_regex,
                 tap_action: cfg.tap_action,
                 double_tap_action: cfg.double_tap_action,
                 hold_action: cfg.hold_action,
@@ -473,6 +470,41 @@ class DataRow {
     };
 }
 
+// Replace cell references with actual data.
+function getRefs(source, row_data, row_cells) {
+    function _replace_col(match, p1) {
+        return row_data[p1].content;
+    }
+    function _replace_cell(match, p1) {
+        return row_cells[p1].innerText.trim();
+    }
+    function _replace_text(value) {
+        const regex_col = /col\[(\d+)\]/gm;
+        const regex_cell = /cell\[(\d+)\]/gm;
+        let modify = value.replace(regex_col, _replace_col);
+        modify = modify.replace(regex_cell, _replace_cell);
+        return modify;
+    }
+
+    // Search for col and cell references (e.g. "col[3]", "cell[2]") and replace with actual data values.
+    if (source) {
+        if (typeof source === "object") {
+            // Walk object structure looking for substitutions.
+            let myobj = Object.fromEntries(
+                Object.entries(source).map(([key, value]) => [key, _replace_text(value)])
+            );
+            return myobj;
+        }
+        else {
+            // Process simple string.
+            let mystr = _replace_text(source);
+            return mystr;
+        }
+    }
+    else {
+        return "";
+    }
+}
 
 /** The HTMLElement, which is used as a base for the Lovelace custom card */
 class FlexTableCard extends HTMLElement {
@@ -560,7 +592,7 @@ class FlexTableCard extends HTMLElement {
 
         // CSS styles as assoc-data to allow seperate updates by key, i.e., css-selector
         var css_styles = {
-            "table":                    "width: 100%; padding: 16px; user-select: text; ",
+            "table":                    `width: 100%; padding: 16px; ${cfg.selectable ? "user-select: text;" : ""} `,
             "thead th":                 "height: 1em;",
             "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; ",
             "th":                       "padding-left: 0.5em; padding-right: 0.5em; ",
@@ -656,32 +688,12 @@ class FlexTableCard extends HTMLElement {
     }
 
     _setup_cell_for_editing(elem, row, col, index) {
-        function getCellRefs(modify, raw_data) {
-            function _replacer(match, p1) {
-                return raw_data[p1].innerText.trim();
-            }
-            // Search for cell references (e.g. "x[2]") and replace with actual cell values.
-            const regex = /[x]\[(\d+)\]/gm;
-            modify = modify.replace(regex, _replacer);
-            return modify;
-        }
-
-        function _handle_lost_focus(e) {
+                function _handle_lost_focus(e) {
             // Check if user changed text.
             if (this.textContent != this.dataset.original) {
-                // Validate text if regex provided
-                if (col.valid_regex) {
-                    let regex = new RegExp(col.valid_regex);
-                    if (!regex.test(this.textContent)) {
-                        alert("Text does not pass validation check.");
-                        this.textContent = this.dataset.original;
-                        return;
-                    }
-                }
-
                 // Substitute actual data for placeholders
                 const service_data = Object.fromEntries(
-                    Object.entries(col.edit_action.data).map(([key, value]) => [key, getCellRefs(value, elem.cells)])
+                    Object.entries(col.edit_action.data).map(([key, value]) => [key, getRefs(value, row.data, elem.cells)])
                 );
                 const actionConfig = {
                     tap_action: {
@@ -753,21 +765,23 @@ class FlexTableCard extends HTMLElement {
         }
 
         // Define handlers for cell actions.
-        function _handle_more_info(obj, action_type, row, col) {
+        function _handle_more_info(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "more-info",
-                    entity: col[action_type].target?.entity_id ?? row.entity.entity_id
+                    entity: col[action_type].entity ?? row.entity.entity_id,
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
 
             _fireEvent(obj, action_type, actionConfig);
         }
 
-        function _handle_toggle(obj, action_type, row, col) {
+        function _handle_toggle(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "toggle",
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
                 entity: col[action_type].target?.entity_id ?? row.entity.entity_id,
             };
@@ -775,53 +789,59 @@ class FlexTableCard extends HTMLElement {
             _fireEvent(obj, action_type, actionConfig);
         }
 
-        function _handle_perform_action(obj, action_type, row, col) {
+        function _handle_perform_action(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "perform-action",
                     perform_action: col[action_type].perform_action,
                     data: col[action_type].data,
                     target: col[action_type].target,
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
 
             _fireEvent(obj, action_type, actionConfig);
         }
 
-        function _handle_navigate(obj, action_type, row, col) {
+        function _handle_navigate(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "navigate",
                     navigation_path: col[action_type].navigation_path ?? col.content,
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
 
             _fireEvent(obj, action_type, actionConfig);
         }
 
-        function _handle_url(obj, action_type, row, col) {
+        function _handle_url(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "url",
-                    url_path: col[action_type].url_path ?? col.content,
+                    url_path: getRefs(col[action_type].url_path ??
+                        col.content, row.data, elem.cells)
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, ""),
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
 
             _fireEvent(obj, action_type, actionConfig);
         }
 
-        function _handle_assist(obj, action_type, row, col) {
+        function _handle_assist(obj, action_type, elem, row, col) {
             const actionConfig = {
                 [action_type]: {
                     action: "assist",
                     start_listening: col[action_type].start_listening,
                     pipeline_id: col[action_type].pipeline_id,
+                    confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
 
             _fireEvent(obj, action_type, actionConfig);
         }
-        function _handle_action(obj, action_type, row, col) {
+        function _handle_action(obj, action_type, elem, row, col) {
             let action;
             switch (action_type) {
                 case "tap_action":
@@ -839,30 +859,30 @@ class FlexTableCard extends HTMLElement {
 
             switch (action["action"]) {
                 case "more-info":
-                    _handle_more_info(obj, action_type, row, col);
+                    _handle_more_info(obj, action_type, elem, row, col);
                     break;
                 case "toggle":
-                    _handle_toggle(obj, action_type, row, col);
+                    _handle_toggle(obj, action_type, elem, row, col);
                     break;
                 case "perform-action":
-                    _handle_perform_action(obj, action_type, row, col);
+                    _handle_perform_action(obj, action_type, elem, row, col);
                     break;
                 case "navigate":
-                    _handle_navigate(obj, action_type, row, col);
+                    _handle_navigate(obj, action_type, elem, row, col);
                     break;
                 case "url":
-                    _handle_url(obj, action_type, row, col);
+                    _handle_url(obj, action_type, elem, row, col);
                     break;
                 case "assist":
-                    _handle_assist(obj, action_type, row, col);
+                    _handle_assist(obj, action_type, elem, row, col);
                     break;
                 case "edit":
-                    _handle_edit(obj, action_type, row, col);
+                    _handle_edit(obj, action_type, elem, row, col);
                     break;
                 case "none":
                     break;
                 default:
-                    throw new Error(`Expected one of none, toggle, more-info, perform-action, url, navigate, assist, edit, but received: ${action["action"]}`)
+                    throw new Error(`Expected one of none, toggle, more-info, perform-action, url, navigate, assist, but received: ${action["action"]}`)
             }
         }
 
@@ -871,7 +891,7 @@ class FlexTableCard extends HTMLElement {
             let colindex = -1;
 
             // Setup any actionable columns
-            row.data.forEach((col, idx) => {
+            row.data.forEach((col) => {
                 if (!col.hide) {
                     colindex++;
                     let cell = elem.cells[colindex];
@@ -883,7 +903,7 @@ class FlexTableCard extends HTMLElement {
                         function handleClick(e) {
                             if (clickTimer == 0 && holdTimer == 0) {
                                 clickTimer = setTimeout(() => {
-                                    _handle_action(this, "tap_action", row, col);
+                                    _handle_action(this, "tap_action", elem, row, col);
                                     clickTimer = 0;
                                 }, 400);
                             }
@@ -895,7 +915,7 @@ class FlexTableCard extends HTMLElement {
                         function handleDoubleClick(e) {
                             clearTimeout(clickTimer);
                             clickTimer = 0;
-                            _handle_action(this, "double_tap_action", row, col);
+                            _handle_action(this, "double_tap_action", elem, row, col);
                         }
                         cell.addEventListener("dblclick", handleDoubleClick);
                     };
@@ -914,7 +934,7 @@ class FlexTableCard extends HTMLElement {
                         function handleMouseUp(e) {
                             if (isHolding) {
                                 isHolding = false;
-                                _handle_action(this, "hold_action", row, col);
+                                _handle_action(this, "hold_action", elem, row, col);
                             }
                             else {
                                 clearTimeout(holdTimer);
