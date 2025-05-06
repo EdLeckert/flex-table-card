@@ -612,7 +612,11 @@ class FlexTableCard extends HTMLElement {
             "tbody tr:nth-child(odd)":  "background-color: var(--table-row-background-color); ",
             "tbody tr:nth-child(even)": "background-color: var(--table-row-alternative-background-color); ",
             "th ha-icon":               "height: 1em; vertical-align: top; ",
-            "tfoot *":                  "border-style: solid none solid none;"
+            "tfoot *":                  "border-style: solid none solid none;",
+            "td":                       "position: relative; ",
+            "@keyframes ripple":        "0% { transform: scale(0); opacity: 0; } 100% {transform: scale(1); opacity: 0.7;}",
+            ".mouseheld::after":
+                                        "content: ''; opacity: 0.7; z-index: 999; position: absolute; display: inline-block; animation: ripple 200ms linear; top: var(--after-top, 0); left: var(--after-left, 0); width: 98px; height: 98px; border-radius: 50%; background-color: rgb(184,231,253); ",
         }
         // apply CSS-styles from configuration
         // ("+" suffix to key means "append" instead of replace)
@@ -925,8 +929,13 @@ class FlexTableCard extends HTMLElement {
 
                         function handleMouseDown(e) {
                             isHolding = false;
+                            var rect = e.target.getBoundingClientRect();
+                            var x = e.clientX - rect.left - 49; // 49 is 1/2 of 98px disk
+                            var y = e.clientY - rect.top - 49;
                             holdTimer = setTimeout(() => {
                                 isHolding = true;
+                                cell.style.setProperty('--after-left', `${x}px`);
+                                cell.style.setProperty('--after-top', `${y}px`);
                                 cell.classList.add("mouseheld");
                             }, holdDuration);
                         }
@@ -935,6 +944,7 @@ class FlexTableCard extends HTMLElement {
                             if (isHolding) {
                                 isHolding = false;
                                 _handle_action(this, "hold_action", elem, row, col);
+                                e.preventDefault();
                             }
                             else {
                                 clearTimeout(holdTimer);
@@ -944,12 +954,16 @@ class FlexTableCard extends HTMLElement {
 
                         function handleCancel(e) {
                             cell.classList.remove("mouseheld");
+                            isHolding = false;
                         }
 
                         // Add event listeners to the desired element
                         cell.addEventListener('mousedown', handleMouseDown);
+                        cell.addEventListener('touchstart', handleMouseDown);
                         cell.addEventListener('mouseup', handleMouseUp);
+                        cell.addEventListener('touchend', handleMouseUp);
                         window.addEventListener('mouseup', handleCancel);
+                        window.addEventListener('touchmove', handleCancel);
                     };
 
                     if (col.edit_action) {
