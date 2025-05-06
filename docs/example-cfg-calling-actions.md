@@ -2,15 +2,21 @@
 
 ## Using Tap Actions
 
-The `flex-table-card` supports the same tap actions as many other Home Assistant cards, namely the `tap_action`, 
-`hold_action`, and the `double_tap_action`. In addition, it supports the `edit_action` which will be covered below.
+The `flex-table-card` supports the same tap actions as many other Home Assistant cards, namely `tap_action`, 
+`hold_action`, and `double_tap_action`. In addition, it supports the `edit_action` which will be covered below.
 
-The use of Actions in Home Assistant is described [here](https://www.home-assistant.io/dashboards/actions/).
+The use of Actions in Home Assistant is described [here](https://www.home-assistant.io/dashboards/actions/). The behavior
+of the `flex-table-card` is similar to that of the cards mentioned in the list.
+
+When a column has been configured for actions, the cells of that column will change color when a mouse hovers over them.
+
+Note that the default size of cells may be too small to be accurately controlled with finger touches. You can use CSS
+to increase the size of cells, as shown in some of the examples below.
 
 ### Calling the `more-info` Action using `tap_action`
 
-To perform the `more-info` Action when a single column in a `flex-table-card` is tapped, you can use a card definition like below.
-When a row in the Temperature column is tapped, a More Info popup will be displayed.
+To perform the `more-info` Action when a cell in a configured column in `flex-table-card` is tapped, 
+you can use a card definition like below. Here, when a row in the Temperature column is tapped, a More Info popup will be displayed.
 
 (Alternatively, you can set `clickable=true` on the entire card to perform the `more-info` Action on all columns of the card.)
 
@@ -57,9 +63,10 @@ columns:
 
 ### Calling the `perform-action` Action using `hold_action`
 
-You can use a definition like the following to perform any Home Assistant action by holding your mouse or finger on a 
-column for more than half a second. The cell will change color when ready to active. Move your mouse or finger off the
-cell before releasing to cancel the action.
+You can use a definition like the following to perform any supported Home Assistant action. This example demonstrates the
+use of `hold_action`. When you press and hold your mouse or finger on a cell for more than half a second, 
+you will see a visual cue when the action is ready to activate. Release to fire the action. 
+Move your mouse or finger off the cell before releasing to cancel the action.
 
 This example also demonstrates the use of `confirmation` to confirm the action. The `confirmation` option may be used on any action type.
 

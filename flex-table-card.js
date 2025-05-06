@@ -506,6 +506,10 @@ function getRefs(source, row_data, row_cells) {
     }
 }
 
+// Used for feedback during mouse/touch hold
+var holdDiskDiam = 98;
+
+
 /** The HTMLElement, which is used as a base for the Lovelace custom card */
 class FlexTableCard extends HTMLElement {
     constructor() {
@@ -596,13 +600,12 @@ class FlexTableCard extends HTMLElement {
             "thead th":                 "height: 1em;",
             "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; ",
             "th":                       "padding-left: 0.5em; padding-right: 0.5em; ",
-            "tr td.left":               "text-align: left; ",
-            "th.left":                  "text-align: left; ",
-            "tr td.center":             "text-align: center; ",
-            "th.center":                "text-align: center; ",
-            "tr td.right":              "text-align: right; ",
-            "td.mouseheld":             "background-color: LightCyan; ",
-            "th.right":                 "text-align: right; ",
+            "tr td.left":               "text-align: left; position: relative;",
+            "th.left":                  "text-align: left; position: relative;",
+            "tr td.center":             "text-align: center; position: relative;",
+            "th.center":                "text-align: center; position: relative;",
+            "tr td.right":              "text-align: right; position: relative;",
+            "th.right":                 "text-align: right; position: relative;",
             ".headerSortDown::after, .headerSortUp::after":
                                         "content: ''; position: relative; left: 2px; border: 6px solid transparent; ",
             ".headerSortDown::after":   "top: 12px; border-top-color: var(--primary-text-color); ",
@@ -613,10 +616,10 @@ class FlexTableCard extends HTMLElement {
             "tbody tr:nth-child(even)": "background-color: var(--table-row-alternative-background-color); ",
             "th ha-icon":               "height: 1em; vertical-align: top; ",
             "tfoot *":                  "border-style: solid none solid none;",
-            "td":                       "position: relative; ",
+            "td.enable-hover:hover":    "background-color: rgb(240,242,243); ",
             "@keyframes ripple":        "0% { transform: scale(0); opacity: 0; } 100% {transform: scale(1); opacity: 0.7;}",
             ".mouseheld::after":
-                                        "content: ''; opacity: 0.7; z-index: 999; position: absolute; display: inline-block; animation: ripple 200ms linear; top: var(--after-top, 0); left: var(--after-left, 0); width: 98px; height: 98px; border-radius: 50%; background-color: rgb(184,231,253); ",
+                                        `content: ''; opacity: 0.7; z-index: 999; position: absolute; display: inline-block; animation: ripple 200ms linear; top: var(--after-top, 0); left: var(--after-left, 0); width: ${holdDiskDiam}px; height: ${holdDiskDiam}px; border-radius: 50%; background-color: rgb(184,231,253); `,
         }
         // apply CSS-styles from configuration
         // ("+" suffix to key means "append" instead of replace)
@@ -912,6 +915,7 @@ class FlexTableCard extends HTMLElement {
                                 }, 400);
                             }
                         }
+                        cell.classList.add("enable-hover");
                         cell.addEventListener("click", handleClick);
                     };
 
@@ -921,23 +925,36 @@ class FlexTableCard extends HTMLElement {
                             clickTimer = 0;
                             _handle_action(this, "double_tap_action", elem, row, col);
                         }
+                        cell.classList.add("enable-hover");
                         cell.addEventListener("dblclick", handleDoubleClick);
                     };
 
                     if (col.hold_action) {
                         const holdDuration = 500;
+                        var targetRect;
 
                         function handleMouseDown(e) {
                             isHolding = false;
-                            var rect = e.target.getBoundingClientRect();
-                            var x = e.clientX - rect.left - 49; // 49 is 1/2 of 98px disk
-                            var y = e.clientY - rect.top - 49;
+                            targetRect = e.target.getBoundingClientRect();
+                            var xpt;
+                            var ypt;
+                            if (e instanceof MouseEvent) {
+                                xpt = e.clientX;
+                                ypt = e.clientY;
+                            }
+                            else {
+                                xpt = e.targetTouches[0].clientX;
+                                ypt = e.targetTouches[0].clientY;
+                            }
+                            var x = xpt - targetRect.left - (holdDiskDiam/2);
+                            var y = ypt - targetRect.top - (holdDiskDiam / 2);
                             holdTimer = setTimeout(() => {
                                 isHolding = true;
                                 cell.style.setProperty('--after-left', `${x}px`);
                                 cell.style.setProperty('--after-top', `${y}px`);
                                 cell.classList.add("mouseheld");
                             }, holdDuration);
+                        //    e.preventDefault();
                         }
 
                         function handleMouseUp(e) {
@@ -953,9 +970,19 @@ class FlexTableCard extends HTMLElement {
                         }
 
                         function handleCancel(e) {
+                            if (e instanceof TouchEvent && targetRect) {
+                                var xpt = e.targetTouches[0].clientX;
+                                var ypt = e.targetTouches[0].clientY;
+                                // If touch within original target, do nothing.
+                                if ((targetRect.left <= xpt && xpt <= targetRect.right) &&
+                                    (targetRect.top <= ypt && ypt <= targetRect.bottom)) {
+                                    return;
+                                }
+                            }
                             cell.classList.remove("mouseheld");
                             isHolding = false;
                         }
+                        cell.classList.add("enable-hover");
 
                         // Add event listeners to the desired element
                         cell.addEventListener('mousedown', handleMouseDown);
