@@ -598,14 +598,14 @@ class FlexTableCard extends HTMLElement {
         var css_styles = {
             "table":                    `width: 100%; padding: 16px; ${cfg.selectable ? "user-select: text;" : ""} `,
             "thead th":                 "height: 1em;",
-            "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; ",
+            "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; position: relative; overflow: hidden; ",
             "th":                       "padding-left: 0.5em; padding-right: 0.5em; ",
-            "tr td.left":               "text-align: left; position: relative;",
-            "th.left":                  "text-align: left; position: relative;",
-            "tr td.center":             "text-align: center; position: relative;",
-            "th.center":                "text-align: center; position: relative;",
-            "tr td.right":              "text-align: right; position: relative;",
-            "th.right":                 "text-align: right; position: relative;",
+            "tr td.left":               "text-align: left; ",
+            "th.left":                  "text-align: left; ",
+            "tr td.center":             "text-align: center; ",
+            "th.center":                "text-align: center; ",
+            "tr td.right":              "text-align: right; ",
+            "th.right":                 "text-align: right; ",
             ".headerSortDown::after, .headerSortUp::after":
                                         "content: ''; position: relative; left: 2px; border: 6px solid transparent; ",
             ".headerSortDown::after":   "top: 12px; border-top-color: var(--primary-text-color); ",
@@ -616,10 +616,11 @@ class FlexTableCard extends HTMLElement {
             "tbody tr:nth-child(even)": "background-color: var(--table-row-alternative-background-color); ",
             "th ha-icon":               "height: 1em; vertical-align: top; ",
             "tfoot *":                  "border-style: solid none solid none;",
-            "td.enable-hover:hover":    "background-color: rgb(240,242,243); ",
-            "@keyframes ripple":        "0% { transform: scale(0); opacity: 0; } 100% {transform: scale(1); opacity: 0.7;}",
-            ".mouseheld::after":
-                                        `content: ''; opacity: 0.7; z-index: 999; position: absolute; display: inline-block; animation: ripple 200ms linear; top: var(--after-top, 0); left: var(--after-left, 0); width: ${holdDiskDiam}px; height: ${holdDiskDiam}px; border-radius: 50%; background-color: rgb(184,231,253); `,
+            "td:hover":                 "background-color: rgba(var(--rgb-secondary-text-color), 0.2); ",
+            ".mouseheld::after":        `content: ''; opacity: 0.7; z-index: 999; position: absolute; display: inline-block; animation: disc 200ms linear; top: var(--after-top, 0); left: var(--after-left, 0); width: ${holdDiskDiam}px; height: ${holdDiskDiam}px; border-radius: 50%; background-color: rgba(var(--rgb-primary-color), 0.285); `,
+            "@keyframes disc":          "0% { transform: scale(0); opacity: 0; } 100% {transform: scale(1); opacity: 0.7; }",
+            "span.ripple":              "position: absolute; border-radius: 50 %; transform: scale(0); animation: ripple 600ms linear; background-color: rgba(127, 127, 127, 0.7); ",
+            "@keyframes ripple":        "to { transform: scale(4); opacity: 0; } ",
         }
         // apply CSS-styles from configuration
         // ("+" suffix to key means "append" instead of replace)
@@ -801,7 +802,7 @@ class FlexTableCard extends HTMLElement {
                 [action_type]: {
                     action: "perform-action",
                     perform_action: col[action_type].perform_action,
-                    data: col[action_type].data,
+                    data: getRefs(col[action_type].data, row.data, elem.cells),
                     target: col[action_type].target,
                     confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
@@ -897,6 +898,18 @@ class FlexTableCard extends HTMLElement {
             const elem = this.shadowRoot.getElementById(`entity_row_${row.entity.entity_id}_${index}`);
             let colindex = -1;
 
+            function _do_ripple(target) {
+                const circle = document.createElement("span");
+                const diameter = Math.max(target.clientWidth, target.clientHeight);
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = "0px";
+                circle.style.top = "0px";
+                circle.classList.add("ripple");
+                const ripple = target.getElementsByClassName("ripple")[0];
+                if (ripple) ripple.remove();
+                target.appendChild(circle);
+            }
+
             // Setup any actionable columns
             row.data.forEach((col) => {
                 if (!col.hide) {
@@ -907,15 +920,23 @@ class FlexTableCard extends HTMLElement {
                     let isHolding = false;
 
                     if (col.tap_action) {
+                        const clickWait = 400;
                         function handleClick(e) {
+                            let event = e;
                             if (clickTimer == 0 && holdTimer == 0) {
+                                // Set timer to perform action after waiting for possible double click
                                 clickTimer = setTimeout(() => {
+                                    _do_ripple(this);
                                     _handle_action(this, "tap_action", elem, row, col);
                                     clickTimer = 0;
-                                }, 400);
+                                }, clickWait);
+                            }
+                            // Double click or hold happening instead of click
+                            else {
+                                clearTimeout(clickTimer);
+                                clickTimer = 0;
                             }
                         }
-                        cell.classList.add("enable-hover");
                         cell.addEventListener("click", handleClick);
                     };
 
@@ -923,9 +944,9 @@ class FlexTableCard extends HTMLElement {
                         function handleDoubleClick(e) {
                             clearTimeout(clickTimer);
                             clickTimer = 0;
+                            _do_ripple(e.target);
                             _handle_action(this, "double_tap_action", elem, row, col);
                         }
-                        cell.classList.add("enable-hover");
                         cell.addEventListener("dblclick", handleDoubleClick);
                     };
 
@@ -952,14 +973,15 @@ class FlexTableCard extends HTMLElement {
                                 isHolding = true;
                                 cell.style.setProperty('--after-left', `${x}px`);
                                 cell.style.setProperty('--after-top', `${y}px`);
+                                cell.style.setProperty('overflow', 'visible');
                                 cell.classList.add("mouseheld");
                             }, holdDuration);
-                        //    e.preventDefault();
                         }
 
                         function handleMouseUp(e) {
                             if (isHolding) {
                                 isHolding = false;
+                                _do_ripple(e.target);
                                 _handle_action(this, "hold_action", elem, row, col);
                                 e.preventDefault();
                             }
@@ -970,7 +992,7 @@ class FlexTableCard extends HTMLElement {
                         }
 
                         function handleCancel(e) {
-                            if (e instanceof TouchEvent && targetRect) {
+                            if (e instanceof TouchEvent && e.targetTouches.length > 0 && targetRect) {
                                 var xpt = e.targetTouches[0].clientX;
                                 var ypt = e.targetTouches[0].clientY;
                                 // If touch within original target, do nothing.
@@ -979,17 +1001,18 @@ class FlexTableCard extends HTMLElement {
                                     return;
                                 }
                             }
+                            cell.style.setProperty('overflow', 'hidden');
                             cell.classList.remove("mouseheld");
                             isHolding = false;
                         }
-                        cell.classList.add("enable-hover");
 
-                        // Add event listeners to the desired element
+                        // Add event listeners to the element
                         cell.addEventListener('mousedown', handleMouseDown);
                         cell.addEventListener('touchstart', handleMouseDown);
                         cell.addEventListener('mouseup', handleMouseUp);
                         cell.addEventListener('touchend', handleMouseUp);
                         window.addEventListener('mouseup', handleCancel);
+                        cell.addEventListener('touchend', handleCancel);
                         window.addEventListener('touchmove', handleCancel);
                     };
 
