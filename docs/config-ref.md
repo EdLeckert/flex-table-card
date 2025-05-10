@@ -98,6 +98,17 @@ Apart from that `modify` and `footer_modify` are very powerful, see [advanced ce
 
 **Note: In releases after v0.7.7, using `modify` as a data selector is discouraged. The `data` option can now be used to walk complex structures where `modify` was once needed.**
 
+**Currently the available *formatters are:**
+* `full_datetime`
+* `hours_passed` 
+* `hours_mins_passed`
+* `number`
+* `duration`
+* `duration_h`
+
+Feel free to contribute, just share your best `modify` line to allow others to use them, too.
+
+
 ***`columns` options (2nd level): [editing and calling actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md)***
 
 | option                 | Type     | Required?     | Description
@@ -107,16 +118,6 @@ Apart from that `modify` and `footer_modify` are very powerful, see [advanced ce
 | `double__tap_action`   | string   |   optional    | Action taken on double tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action).
 | `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
 
-
-### Currently the available *formatters are: 
-* `full_datetime`
-* `hours_passed` 
-* `hours_mins_passed`
-* `number`
-* `duration`
-* `duration_h`
-
-Feel free to contribute, just share your best `modify` line to allow others to use them, too.
 
 
 [Return to main README.md](../README.md)
