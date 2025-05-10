@@ -317,4 +317,6 @@ display before and after values:
 
 <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%">
 
+
+
 [Return to main README.md](../README.md)

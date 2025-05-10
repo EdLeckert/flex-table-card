@@ -98,6 +98,16 @@ Apart from that `modify` and `footer_modify` are very powerful, see [advanced ce
 
 **Note: In releases after v0.7.7, using `modify` as a data selector is discouraged. The `data` option can now be used to walk complex structures where `modify` was once needed.**
 
+***`columns` options (2nd level): [editing and calling actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md)***
+
+| option                 | Type     | Required?     | Description
+| ----                   | ----     | ------------- | -----------
+| `tap_action`           | string   |   optional    | Action taken on card tap. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
+| `hold_action`          | string   |   optional    | Action taken on tap-and-hold. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
+| `double__tap_action`   | string   |   optional    | Action taken on double tap. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
+| `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions).
+
+
 ### Currently the available *formatters are: 
 * `full_datetime`
 * `hours_passed` 
