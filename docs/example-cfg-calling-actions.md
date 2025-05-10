@@ -17,9 +17,10 @@ to increase the size of cells, as shown in some of the examples below.
 
 To perform the `more-info` Action when a cell in a configured column in `flex-table-card` is tapped, 
 you can use a card definition such as the one below. Here, when a row in the Temperature column is tapped, 
-a More Info popup will be displayed.
+a More Info popup will be displayed for the entity.
 
-(Alternatively, you can set `clickable=true` on the entire card to perform the `more-info` Action on all columns of the card.)
+(Alternatively, you can set `clickable=true` on the entire card to perform the `more-info` Action on all columns of the card 
+if you don't plan to use any other actions.)
 
 ``` yaml
 type: custom:flex-table-card
@@ -46,7 +47,6 @@ type: custom:flex-table-card
 entities:
   include:
     - light.bed*
-auto_format: true
 columns:
   - name: Name
     data: friendly_name
@@ -63,9 +63,7 @@ An entity list is not allowed.
       target:
         entity_id: light.living_room_overheads
 ```
-Note that the entity above would be used for actions launched from all rows in the table.
-
-_
+Note that the same target entity would be used for actions launched from all rows in the table.
 
 ### Example: Calling the `perform-action` Action using `hold_action`
 
@@ -77,7 +75,7 @@ Move your mouse or finger off the cell before releasing to cancel the action.
 
 This example also demonstrates the use of `confirmation` to confirm the action. The `confirmation` option may be used on any action type.
 
-Finally, the example uses the value in an adjacent cell to provide a value to the action. The reference to `cell[3]` uses
+Finally, the example uses the value in an adjacent cell to provide a parameter to the action. The reference to `cell[3]` uses
 the value in the fourth column to specify a new brighness level for the light.
 
 ```yaml
@@ -108,9 +106,9 @@ columns:
   - name: New Brightness
     data: brightness
     modify: |
-      typeof x === "number" ? Math.min(parseFloat(x * 1.2), 255) : 10
+      typeof x === "number" ? Math.min(parseInt(x * 1.2), 255) : 10
 ```
-<img src="../images/PressHold.png" alt="Press and hold example" width="25%">
+<img src="../images/PressHold.png" alt="Press and hold example" width="50%">
 
 The target entity does not need to be specified -- the row entity will automatically be used.
 However, if for some reason you need to provide an entity, you can specify an entity or entity list with the `target` option
@@ -123,14 +121,14 @@ on the action column.
           - light.living_room_tall_lamp
           - light.fireplace_lamp
 ```
-Note that the entities above would be used for actions launched from all rows in the table.
+Note that the target entities would be used for actions launched from all rows in the table.
 
 ### Example: Calling the `url` Action with a Button
 
 The next example demonstrates a number of features of the `flex-table-card`. It uses the 
 [Home Assistant Wine Cellar Integration](https://github.com/EdLeckert/wine-cellar) to demonstrate the use of
 buttons to access an external website to complete an action. It shows some advanced techniques for formatting
-columns as well as the use of `col` to reference data in an adjacent hidden column.
+columns as well as the use of `col[n]` to reference data in an adjacent hidden column.
 
 ```yaml
 type: custom:flex-table-card
@@ -241,7 +239,67 @@ action, they are taken to a page on the website where they can remove a bottle f
 these actions open a new tab in the browser, so the browser must be configured to allow new tabs. Also, the 
 user must be logged in to their account on `cellartracker.com` as no authentication credentials are passed.
 
-<img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="50%">
+<img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%">
 
+### Example: Editing a cell using `edit_action`
+
+The `edit_action` feature allows you to edit the text in a cell and then use any action to do whatever is necessary 
+to save your changes. Typically you would use `perform-action` for this purpose.
+
+The following example uses the 
+[T-Mobile Home Internet Integration for Home Assistant](https://github.com/EdLeckert/ha-tmobilehome), which allows users
+to control their T-Mobile Home Internet gateway from Home Assistant. The `flex-table-card` is an excellent way to view the list of
+Wi-Fi and wired devices connected to the gateway. However, often the gateway is unable to retrieve the hostnames of certain devices,
+so the integration provides an action to assign a meaningful name to the device for display in Home Assistant. The  `edit_action` 
+feature provides the most user-friendly way to assign hostnames to devices.
+
+When you use the `edit_action` option on a column, clicking in that column puts the cell in edit mode. To commit your change you can
+press `Enter` or do anything to cause the cell to lose focus, such as tabbing or clicking outside of the cell. You can press the
+`Esc` key to undo your unsaved changes. 
+
+And of course you can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
+the changed value even if you cancel the confirmation. You must re-edit the field or refresh the card, as appropriate.
+
+In this example, the `tmobile_home_internet.set_client_hostname` action is used to commit the user's edit back to the integration.
+The parameters needed by this action, `mac_address` and the edited `hostname`, are provided by `cell[n]` references.
+
+Note that while a `target` entity is provided, it is not necessary, as an entity has already been defined for the card, since it
+is needed by the `tmobile_home_internet.get_client_list` action that populates the card with data.
+
+
+```yaml
+type: custom:flex-table-card
+title: T-Mobile Home Internet Clients
+action: tmobile_home_internet.get_client_list
+entities:
+  include: sensor.t_mobile_gateway
+sort_by: IP Address
+selectable: true
+columns:
+  - name: Name
+    data: clients.name
+    edit_action:
+      action: perform-action
+      perform_action: tmobile_home_internet.set_client_hostname
+      target:
+        entity_id: sensor.t_mobile_gateway
+      data:
+        mac_address: cell[2]
+        hostname: cell[0]
+  - name: IP Address
+    data: clients.ipv4
+  - name: MAC Address
+    data: clients.mac
+  - name: Interface
+    data: clients.interface
+  - name: Connected
+    data: clients.connected
+    modify: "x ? 'Yes' : 'No'"
+  - name: Signal
+    data: clients.signal
+    modify: x || 'N/A'
+```
+
+<img src="../images/EditedHostname.png" alt="Editing example" width="75%">
 
 [Return to main README.md](../README.md)

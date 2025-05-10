@@ -707,6 +707,7 @@ class FlexTableCard extends HTMLElement {
                         perform_action: col.edit_action.perform_action,
                         data: service_data,
                         target: col.edit_action.target || { entity_id: row.entity.entity_id },
+                        confirmation: getRefs(col.edit_action.confirmation, row.data, elem.cells)
                     },
                 };
 
