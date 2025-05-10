@@ -242,6 +242,7 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
 
 <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%">
 
+
 ## Using Edit Actions
 
 ### Example: Editing a cell using `edit_action`
@@ -314,6 +315,6 @@ display before and after values:
         text: Change hostname from col[0] to cell[0]?
 ```
 
-<img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="100%">
+<img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%">
 
 [Return to main README.md](../README.md)
