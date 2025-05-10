@@ -102,10 +102,10 @@ Apart from that `modify` and `footer_modify` are very powerful, see [advanced ce
 
 | option                 | Type     | Required?     | Description
 | ----                   | ----     | ------------- | -----------
-| `tap_action`           | string   |   optional    | Action taken on card tap. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
-| `hold_action`          | string   |   optional    | Action taken on tap-and-hold. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
-| `double__tap_action`   | string   |   optional    | Action taken on double tap. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions).
-| `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action) and [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions).
+| `tap_action`           | string   |   optional    | Action taken on card tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
+| `hold_action`          | string   |   optional    | Action taken on tap-and-hold. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#hold-action).
+| `double__tap_action`   | string   |   optional    | Action taken on double tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action).
+| `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
 
 
 ### Currently the available *formatters are: 
