@@ -592,6 +592,8 @@ class FlexTableCard extends HTMLElement {
 
         // CSS styles as assoc-data to allow seperate updates by key, i.e., css-selector
         var css_styles = {
+            ".type-custom-flex-table-card":
+                                        "width: fit-content;",
             "table":                    `width: 100%; padding: 16px; ${cfg.selectable ? "user-select: text;" : ""} `,
             "thead th":                 "height: 1em;",
             "tr td":                    "padding-left: 0.5em; padding-right: 0.5em; position: relative; overflow: hidden; ",
