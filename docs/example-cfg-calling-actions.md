@@ -233,6 +233,7 @@ css:
   tr:has(> td div.too-early): color:darkslategray !important;
   tr:has(> td div.too-late): color:red !important;
 ```
+
 When the user double-clicks on the Wine column, they are directed to a search page at `cellartracker.com`
 using the text from the column for the search. When the user clicks on the `Drink` button and confirms the
 action, they are taken to a page on the website where they can remove a bottle from their inventory. Both of
@@ -240,6 +241,8 @@ these actions open a new tab in the browser, so the browser must be configured t
 user must be logged in to their account on `cellartracker.com` as no authentication credentials are passed.
 
 <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%">
+
+## Using Edit Actions
 
 ### Example: Editing a cell using `edit_action`
 
@@ -256,9 +259,6 @@ feature provides the most user-friendly way to assign hostnames to devices.
 When you use the `edit_action` option on a column, clicking in that column puts the cell in edit mode. To commit your change you can
 press `Enter` or do anything to cause the cell to lose focus, such as tabbing or clicking outside of the cell. You can press the
 `Esc` key to undo your unsaved changes. 
-
-And of course you can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
-the changed value even if you cancel the confirmation. You must re-edit the field or refresh the card, as appropriate.
 
 In this example, the `tmobile_home_internet.set_client_hostname` action is used to commit the user's edit back to the integration.
 The parameters needed by this action, `mac_address` and the edited `hostname`, are provided by `cell[n]` references.
@@ -300,6 +300,20 @@ columns:
     modify: x || 'N/A'
 ```
 
-<img src="../images/EditedHostname.png" alt="Editing example" width="75%">
+<img src="../images/EditedHostname.png" alt="Editing example" width="100%">
+
+You can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
+the changed value even if you cancel the confirmation. You must re-edit the field or refresh the card, as appropriate.
+
+The primary difference between a `cell[n]` reference and a `col[n]` reference is that the latter includes hidden columns.
+But when editing a cell, it also contains the pre-edited value. So the following confirmation definition could be used to 
+display before and after values:
+
+```yaml
+      confirmation:
+        text: Change hostname from col[0] to cell[0]?
+```
+
+<img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="100%">
 
 [Return to main README.md](../README.md)
