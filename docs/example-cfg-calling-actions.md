@@ -330,7 +330,6 @@ display before and after values:
 ```
 
 | <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/> | 
-|:--:| 
-| *Cell refrerences can be used to add </br>meaningful information to </br>confirmation dialogs.</b>* |
+| __Cell refrerences can be used to add </br>meaningful information to </br>confirmation dialogs.</b>__ |
 
 [Return to main README.md](../README.md)
