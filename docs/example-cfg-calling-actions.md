@@ -240,11 +240,9 @@ action, they are taken to a page on the website where they can remove a bottle f
 these actions open a new tab in the browser, so the browser must be configured to allow new tabs. Also, the 
 user must be logged in to their account on `cellartracker.com` as no authentication credentials are passed.
 
-<img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%">
-
 <figure>
   <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%"/>
-  <figcaption>This is my caption text.</figcaption>
+  <figcaption>**This is my caption text.**</figcaption>
 </figure>
 
 ## Using Edit Actions
