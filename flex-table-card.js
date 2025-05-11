@@ -476,7 +476,7 @@ function getRefs(source, row_data, row_cells) {
         return row_data[p1].content;
     }
     function _replace_cell(match, p1) {
-        return row_cells[p1].innerText.trim();
+        return row_cells[p1].innerText;
     }
     function _replace_text(value) {
         const regex_col = /col\[(\d+)\]/gm;
@@ -697,16 +697,12 @@ class FlexTableCard extends HTMLElement {
                 function _handle_lost_focus(e) {
             // Check if user changed text.
             if (this.textContent != this.dataset.original) {
-                // Substitute actual data for placeholders
-                const service_data = Object.fromEntries(
-                    Object.entries(col.edit_action.data).map(([key, value]) => [key, getRefs(value, row.data, elem.cells)])
-                );
                 const actionConfig = {
                     tap_action: {
                         action: "perform-action",
                         perform_action: col.edit_action.perform_action,
-                        data: service_data,
-                        target: col.edit_action.target || { entity_id: row.entity.entity_id },
+                        data: getRefs(col.edit_action.data, row.data, elem.cells),
+                        target: col.edit_action.target ?? { entity_id: row.entity.entity_id },
                         confirmation: getRefs(col.edit_action.confirmation, row.data, elem.cells)
                     },
                 };
@@ -921,7 +917,7 @@ class FlexTableCard extends HTMLElement {
                     let isHolding = false;
 
                     if (col.tap_action) {
-                        const clickWait = 400;
+                        const clickWait = col.double_tap_action? 300 : 0;
                         function handleClick(e) {
                             let event = e;
                             if (clickTimer == 0 && holdTimer == 0) {
@@ -1009,7 +1005,7 @@ class FlexTableCard extends HTMLElement {
                             isHolding = false;
                         }
 
-                        // Add event listeners to the element
+                        // Add event listeners
                         cell.classList.add("enable-hover");
                         cell.addEventListener('mousedown', handleMouseDown);
                         cell.addEventListener('touchstart', handleMouseDown);

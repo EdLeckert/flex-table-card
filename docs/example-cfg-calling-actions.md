@@ -13,6 +13,7 @@ When a column has been configured for actions, the cells of that column will be 
 Note that the default size of cells may be too small to be accurately controlled with finger touches. You can use CSS
 to increase the size of cells, as shown in some of the examples below.
 
+
 ### Example: Calling the `more-info` Action using `tap_action`
 
 To perform the `more-info` Action when a cell in a configured column in `flex-table-card` is tapped, 
@@ -59,21 +60,16 @@ columns:
 ```
 The entity does not need to be specified -- the row entity will automatically be used.
  
-```yaml
-      target:
-        entity_id: light.living_room_overheads
-```
-Note that the same target entity would be used for actions launched from all rows in the table.
 
 ### Example: Calling the `perform-action` Action using `hold_action`
 
 You can use a definition like the following to perform any supported Home Assistant action. This example demonstrates the
 use of `hold_action`. When you press and hold your mouse or finger on a cell for more than half a second, 
-you will see a visual cue when the action is ready to activate. Release to fire the action.
+you will see a visual cue when the action is ready to activate. Release to perform the action.
 
 Move your mouse or finger off the cell before releasing to cancel the action.
 
-This example also demonstrates the use of `confirmation` to confirm the action. The `confirmation` option may be used on any action type.
+This example demonstrates the use of `confirmation` to confirm the action. The `confirmation` option may be used on any action type.
 
 Finally, the example uses the value in an adjacent cell to provide a parameter to the action. The reference to `cell[3]` uses
 the value in the fourth column to specify a new brighness level for the light.
@@ -91,7 +87,7 @@ columns:
     hold_action:
       action: perform-action
       confirmation:
-        text: Adjust Brightness?
+        text: Increase Brightness?
       perform_action: light.turn_on
       data:
         brightness: cell[3]
@@ -109,7 +105,7 @@ columns:
       typeof x === "number" ? Math.min(parseInt(x * 1.2), 255) : 10
 ```
 
-<img src="../images/PressHold.png" alt="Press and hold example" width="50%"/><br>__This example illustrates the feedback from the hold_action.__
+<img src="../images/PressHold.png" alt="Press and hold example" width="50%"/><br>__The hold_action provides feedback when activated.__
 
 
 The target entity does not need to be specified -- the row entity will automatically be used.
@@ -124,6 +120,39 @@ on the action column.
           - light.fireplace_lamp
 ```
 Note that the target entities would be used for actions launched from all rows in the table.
+
+
+### Example: Calling the `navigate` Action using a col[n] reference to a hidden column
+
+In this example, a user can click on an area and be taken to the view for that area. The example
+assumes that there is a page for each area and that it is named the same as the area, with the 
+exception of capitalization and spaces vs. dashes. The hidden column adjusts for these
+differences, and the `navigation_path` contains a `col[n]` reference to it. (A `cell[n]`
+reference cannot be used on a hidden column.)
+
+```yaml
+type: custom:flex-table-card
+entities:
+  include: light.*lamp
+sort_by: friendly_name
+columns:
+  - name: Light
+    data: friendly_name
+  - name: State
+    data: state
+    tap_action:
+      action: toggle
+  - name: Area
+    data: area
+    tap_action:
+      action: navigate
+      navigation_path: /lovelace-tablet/col[3]
+  - name: hiddenArea
+    data: area
+    hidden: true
+    modify: x.toLowerCase().replace(" ","-")
+```
+
 
 ### Example: Calling the `url` Action with a Button
 
@@ -266,9 +295,9 @@ press `Enter` or do anything to cause the cell to lose focus, such as tabbing or
 In this example, the `tmobile_home_internet.set_client_hostname` action is used to commit the user's edit back to the integration.
 The parameters needed by this action, `mac_address` and the edited `hostname`, are provided by `cell[n]` references.
 
-Note that while a `target` entity is provided, it is not necessary, as an entity has already been defined for the card, since it
-is needed by the `tmobile_home_internet.get_client_list` action that populates the card with data.
-
+If a `target` entity is provided, it will override the row entity on all rows of the table. In this case, all rows share the same entity,
+since it was provided for the `tmobile_home_internet.get_client_list` action that populates the card with data. So the `target` 
+could have been omitted here.
 
 ```yaml
 type: custom:flex-table-card
@@ -303,7 +332,7 @@ columns:
     modify: x || 'N/A'
 ```
 
-<img src="../images/EditedHostname.png" alt="Editing example" width="100%"/><br>__This example demonstrates the use of edit_action to trigger actions.__
+<img src="../images/EditedHostname.png" alt="Editing example" width="100%"/><br>__The edit_action can be used to trigger any action.__
 
 
 You can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
@@ -311,7 +340,8 @@ the changed value even if you cancel the confirmation. You must re-edit the fiel
 
 The primary difference between a `cell[n]` reference and a `col[n]` reference is that the latter includes hidden columns.
 But when editing a cell, it also contains the pre-edited value. So the following confirmation definition could be used to 
-display before and after values:
+display before and after values, but beware. If the source of the card's data is a script, the card will need to be refreshed 
+after the edit, or the `col[n]` reference will continue to show the original data on subsequent edits.
 
 ```yaml
       confirmation:
