@@ -331,8 +331,7 @@ display before and after values:
 
 <figure>
   <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/>
-  <figcaption><b>Cell refrerences can be used to add 
-  meaningful information to confirmation dialogs.</b></figcaption>
+  <figcaption><b>Cell refrerences can be used to add </br>meaningful information to confirmation dialogs.</b></figcaption>
 </figure>
 
 ---
