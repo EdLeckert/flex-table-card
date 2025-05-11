@@ -108,10 +108,8 @@ columns:
     modify: |
       typeof x === "number" ? Math.min(parseInt(x * 1.2), 255) : 10
 ```
-<figure>
   <img src="../images/PressHold.png" alt="Press and hold example" width="50%"/>
-  <figcaption><b>This example illustrates the feedback from the hold_action.</b></figcaption>
-</figure>
+  This example illustrates the feedback from the hold_action.
 
 
 The target entity does not need to be specified -- the row entity will automatically be used.
