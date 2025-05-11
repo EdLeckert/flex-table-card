@@ -19,6 +19,8 @@ To perform the `more-info` Action when a cell in a configured column in `flex-ta
 you can use a card definition such as the one below. Here, when a row in the Temperature column is tapped, 
 a More Info popup will be displayed for the entity.
 
+The entity does not need to be specified -- the row entity will automatically be used.
+
 (Alternatively, you can set `clickable=true` on the entire card to perform the `more-info` Action on all columns of the card 
 if you don't plan to use any other actions.)
 
@@ -56,8 +58,6 @@ columns:
       action: toggle
 ```
 The entity does not need to be specified -- the row entity will automatically be used.
-However, if for some reason you need to provide an entity, you can specify it with the `target` option. 
-An entity list is not allowed.
  
 ```yaml
       target:
@@ -242,6 +242,10 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
 
 <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%">
 
+<figure>
+  <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%"/>
+  <figcaption>This is my caption text.</figcaption>
+</figure>
 
 ## Using Edit Actions
 

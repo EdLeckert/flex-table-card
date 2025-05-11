@@ -4,6 +4,7 @@ The `flex-table-card` aims for more flexibility for tabular-ish visuallization n
 - unlimited columns / rows 
 - various different data-sources may be used in a single table
 - lots of possibilities for configuration: entity selection (include, exclude), action (formerly service) call responses, (hidden-)column-sorting, js-based content manipulation, row limiting and more...
+- the ability to edit data and trigger actions
 
 Flex Table gives you the possibility to visualize any tabular data within Lovelace. Especially overviews with high data densities can be easily realized.
 
@@ -113,7 +114,7 @@ Feel free to contribute, just share your best `modify` line to allow others to u
 
 | option                 | Type     | Required?     | Description
 | ----                   | ----     | ------------- | -----------
-| `tap_action`           | string   |   optional    | Action taken on card tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
+| `tap_action`           | string   |   optional    | Action taken on cell tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
 | `hold_action`          | string   |   optional    | Action taken on tap-and-hold. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#hold-action).
 | `double__tap_action`   | string   |   optional    | Action taken on double tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action).
 | `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).

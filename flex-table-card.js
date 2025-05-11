@@ -777,7 +777,7 @@ class FlexTableCard extends HTMLElement {
             const actionConfig = {
                 [action_type]: {
                     action: "more-info",
-                    entity: col[action_type].entity ?? row.entity.entity_id,
+                    entity: row.entity.entity_id,
                     confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
@@ -791,7 +791,7 @@ class FlexTableCard extends HTMLElement {
                     action: "toggle",
                     confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
-                entity: getRefs(col[action_type].target?.entity_id ?? row.entity.entity_id, row.data, elem.cells),
+                entity: row.entity.entity_id,
             };
 
             _fireEvent(obj, action_type, actionConfig);
@@ -815,7 +815,8 @@ class FlexTableCard extends HTMLElement {
             const actionConfig = {
                 [action_type]: {
                     action: "navigate",
-                    navigation_path: col[action_type].navigation_path ?? col.content,
+                    navigation_path: getRefs(col[action_type].navigation_path ?? col.content, row.data, elem.cells),
+                    navigation_replace: col[action_type].navigation_replace,
                     confirmation: getRefs(col[action_type].confirmation, row.data, elem.cells)
                 },
             };
