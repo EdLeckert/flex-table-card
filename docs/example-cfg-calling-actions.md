@@ -108,8 +108,8 @@ columns:
     modify: |
       typeof x === "number" ? Math.min(parseInt(x * 1.2), 255) : 10
 ```
-<img src="../images/PressHold.png" alt="Press and hold example" width="50%"/>
-<br>__This example illustrates the feedback from the hold_action.__
+
+<img src="../images/PressHold.png" alt="Press and hold example" width="50%"/><br>__This example illustrates the feedback from the hold_action.__
 
 
 The target entity does not need to be specified -- the row entity will automatically be used.
@@ -242,10 +242,7 @@ action, they are taken to a page on the website where they can remove a bottle f
 these actions open a new tab in the browser, so the browser must be configured to allow new tabs. Also, the 
 user must be logged in to their account on `cellartracker.com` as no authentication credentials are passed.
 
-<figure>
-  <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="100%"/>
-  <figcaption><b>This example demonstrates the use of advanced formatting, buttons to perform actions, and a confirmation dialog.</b></figcaption>
-</figure>
+<img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="100%"/><br>__This example demonstrates the use of advanced formatting, buttons to perform actions, and a confirmation dialog.__
 
 
 ## Using Edit Actions
@@ -306,10 +303,7 @@ columns:
     modify: x || 'N/A'
 ```
 
-<figure>
-  <img src="../images/EditedHostname.png" alt="Editing example" width="100%"/>
-  <figcaption><b>This example demonstrates the use of edit_action to trigger actions.</b></figcaption>
-</figure>
+<img src="../images/EditedHostname.png" alt="Editing example" width="100%"/><br>__This example demonstrates the use of edit_action to trigger actions.__
 
 
 You can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
@@ -324,10 +318,7 @@ display before and after values:
         text: Change hostname from col[0] to cell[0]?
 ```
 
-<figure>
-  <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/>
-  <figcaption><b>Cell refrerences can be used to add </br>meaningful information to </br>confirmation dialogs.</b></figcaption>
-</figure>
+<img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/><br>__Cell refrerences can be used to add </br>meaningful information to </br>confirmation dialogs.__
 
 
 
