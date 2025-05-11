@@ -242,7 +242,7 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
 
 <figure>
   <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="75%"/>
-  <figcaption>**This is my caption text.**</figcaption>
+  <figcaption><b>This is my caption text.</b></figcaption>
 </figure>
 
 ## Using Edit Actions
