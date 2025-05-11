@@ -112,6 +112,7 @@ columns:
   <img src="../images/PressHold.png" alt="Press and hold example" width="50%"/>
   <figcaption><b>This example illustrates the feedback from the hold_action.</b></figcaption>
 </figure>
+
 ---
 
 The target entity does not need to be specified -- the row entity will automatically be used.
@@ -248,7 +249,8 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
   <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="100%"/>
   <figcaption><b>This example demonstrates the use of advanced formatting, buttons to perform actions, and a confirmation dialog.</b></figcaption>
 </figure>
-***************************************************************************************************************
+
+---
 
 ## Using Edit Actions
 
@@ -312,7 +314,8 @@ columns:
   <img src="../images/EditedHostname.png" alt="Editing example" width="100%"/>
   <figcaption><b>This example demonstrates the use of edit_action to trigger actions.</b></figcaption>
 </figure>
-___
+
+---
 
 You can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
 the changed value even if you cancel the confirmation. You must re-edit the field or refresh the card, as appropriate.
@@ -328,7 +331,8 @@ display before and after values:
 
 <figure>
   <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/>
-  <figcaption><b>Cell refrerences can be used to add meaningful information to confirmation dialogs.</b></figcaption>
+  <figcaption><b>Cell refrerences can be used to add 
+  meaningful information to confirmation dialogs.</b></figcaption>
 </figure>
 
 ---
