@@ -113,7 +113,6 @@ columns:
   <figcaption><b>This example illustrates the feedback from the hold_action.</b></figcaption>
 </figure>
 
----
 
 The target entity does not need to be specified -- the row entity will automatically be used.
 However, if for some reason you need to provide an entity, you can specify an entity or entity list with the `target` option
@@ -250,7 +249,6 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
   <figcaption><b>This example demonstrates the use of advanced formatting, buttons to perform actions, and a confirmation dialog.</b></figcaption>
 </figure>
 
----
 
 ## Using Edit Actions
 
@@ -315,7 +313,6 @@ columns:
   <figcaption><b>This example demonstrates the use of edit_action to trigger actions.</b></figcaption>
 </figure>
 
----
 
 You can add a `confirmation` step to confirm any change before committing it. But be aware that the cell will retain 
 the changed value even if you cancel the confirmation. You must re-edit the field or refresh the card, as appropriate.
@@ -329,8 +326,11 @@ display before and after values:
         text: Change hostname from col[0] to cell[0]?
 ```
 
-| <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/> | 
-|:--| 
-| __Cell refrerences can be used to add meaningful information to confirmation dialogs.__ |
+<figure>
+  <img src="../images/EditConfirmation.png" alt="Editing with confirmation example" width="25%"/>
+  <figcaption><b>Cell refrerences can be used to add </br>meaningful information to </br>confirmation dialogs.</b></figcaption>
+</figure>
+
+
 
 [Return to main README.md](../README.md)
