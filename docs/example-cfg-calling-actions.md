@@ -248,7 +248,7 @@ user must be logged in to their account on `cellartracker.com` as no authenticat
   <img src="../images/WineConfirmation.png" alt="Wine inventory confirmation example" width="100%"/>
   <figcaption><b>This example demonstrates the use of advanced formatting, buttons to perform actions, and a confirmation dialog.</b></figcaption>
 </figure>
-***
+***************************************************************************************************************
 
 ## Using Edit Actions
 
