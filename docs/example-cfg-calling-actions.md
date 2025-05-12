@@ -119,7 +119,8 @@ on the action column.
           - light.living_room_tall_lamp
           - light.fireplace_lamp
 ```
-Note that the target entities would be used for actions launched from all rows in the table.
+Note that entities specified with the `target` parameter would be used rather than the row entity for actions triggered 
+from all rows in the table.
 
 
 ### Example: Calling the `navigate` Action using a col[n] reference to a hidden column
@@ -220,17 +221,13 @@ columns:
     data: inventory.Wine
     double_tap_action:
       action: url
-      url_path: >-
-        https://www.cellartracker.com/list.asp?Table=List&szSearch=cell[2]
+      url_path: https://www.cellartracker.com/list.asp?Table=List&szSearch=cell[2]
   - name: ConsumeBy
     data: inventory
-    modify: >-
-      (parseInt(x.BeginConsume) > new Date().getFullYear() ? "Z" : "")
-      + 
-
+    modify: |-
+      (parseInt(x.BeginConsume) > new Date().getFullYear() ? "Z" : "") + 
       (((parseInt(x.BeginConsume) || 9999) +
        (parseInt(x.EndConsume) || 9999)) / 2)
-       
     hidden: true
   - name: Category
     data: inventory
