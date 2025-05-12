@@ -1175,6 +1175,7 @@ class FlexTableCard extends HTMLElement {
             let entity_list = entities.map((entity) =>
                 entity.entity_id
             );
+
             hass.callWS({
                 "type": "call_service",
                 "domain": domain,

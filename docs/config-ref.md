@@ -108,7 +108,7 @@ Apart from that `modify` and `footer_modify` are very powerful, see [advanced ce
 * `duration`
 * `duration_h`
 
-Feel free to contribute, just share your best `modify` line to allow others to use them, too.
+Feel free to contribute formatters. Just share your best `modify` line to allow others to use them, too.
 
 
 ***`columns` options (2nd level): [editing and calling actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md)***
@@ -120,6 +120,33 @@ Feel free to contribute, just share your best `modify` line to allow others to u
 | `double__tap_action`   | string   |   optional    | Action taken on double tap. See [Using Tap Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions#using-tap-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#double-tap-action).
 | `edit_action`          | string   |   optional    | Enables editing and defines action taken to commit edit. See [Using Edit Actions](https://github.com/custom-cards/flex-table-card/blob/master/docs/example-cfg-calling-actions.md#using-edit-actions) and [action documentation](https://www.home-assistant.io/dashboards/actions/#tap-action).
 
+The tap acions above allow the use of references to data in other columns in the current row on many of their parameters.
+
+Column references take the form of `cell[n]` and `col[n]`, where `n` is the column index number, beginning at zero. The difference 
+between them is that `cell` can only reference visible columns, whereas `col` can also reference hidden columns, and for that reason 
+may use a different index for subsequent columns after a hidden one. Also, during editing operations with `edit_action`, `cell` 
+references will always reflect the latest value (what is visible in the cell), whereas the `col` reference will contain the value 
+from the last card refresh.
+
+Action parameters that may contain cell references are:
+
+| Action         | Parameter 
+| ------         | ---------
+| perform-action | data
+| navigate       | navigation_path
+| url            | url_path
+| <All Actions>  | confirmation
+
+In some Actions, the entity used for the action can be either the row entity or explicitly stated with a `target` parameter.
+
+| Action         | Entity Used
+| ------         | -----------
+| more-info      | row entity
+| toggle         | row entity
+| perform-action | `target` if specified, otherwise row entity
+| navigate       | N/A
+| url            | N/A
+| assist         | N/A
 
 
 [Return to main README.md](../README.md)
