@@ -135,7 +135,7 @@ Action parameters that may contain cell references are:
 | perform-action | data
 | navigate       | navigation_path
 | url            | url_path
-| <All Actions>  | confirmation
+| All Actions    | confirmation
 
 In some Actions, the entity used for the action can be either the row entity or explicitly stated with a `target` parameter.
 
