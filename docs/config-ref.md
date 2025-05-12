@@ -137,6 +137,7 @@ Action parameters that may contain cell references are:
 | url            | url_path
 | All Actions    | confirmation
 
+
 In some Actions, the entity used for the action can be either the row entity or explicitly stated with a `target` parameter.
 
 | Action         | Entity Used
