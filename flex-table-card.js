@@ -849,7 +849,7 @@ class FlexTableCard extends HTMLElement {
 
         function _handle_fire_dom_event(obj, action_type, elem, row, col) {
             const actionConfig = {
-                [action_type]: col[action_type]
+                [action_type]: getRefs(col[action_type], row.data, elem.cells)
             };
             console.log("actionConfig: %o", actionConfig);
 
