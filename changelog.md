@@ -1,3 +1,12 @@
+## 1.4.0
+* add `time_passed` formatter
+* update docs for `sort_unmodified`
+
+## 1.3.0
+* allow more Action params to contain col/column refs
+* add icon formater to display HA icons
+* add more device attributes
+
 ## 1.2.0
 
 * introduce `static_data` for columns
